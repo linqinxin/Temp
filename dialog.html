@@ -1,0 +1,32 @@
+<link href="jquery-ui.css" rel="stylesheet">
+<script src="external/jquery/jquery.js"></script>
+<script src="jquery-ui.js"></script>
+<body>
+  
+<button id="opener"><a onclick='clickDelete("123")'>打开对话框</a></button>
+<div id="dialog" title="对话框标题">
+我是一个对话框
+<input type='hidden' value='' id='deleteId'>
+<div>
+ <button onclick='submitDelete()'>Submit</button>
+  <button onclick='closeDelete()'>Close</button>
+  </div>
+</div>
+<script>
+$( "#dialog" ).dialog({ autoOpen: false });
+function clickDelete(id){
+ document.getElementById("deleteId").value=id;
+ $( "#dialog" ).dialog( "open" );
+}
+function closeDelete(){
+ $( "#dialog" ).dialog( "close" );
+}
+function submitDelete(){
+var id=document.getElementById("deleteId").value;
+ alert(id);
+ $( "#dialog" ).dialog( "close" );
+}
+</script>
+ 
+</body>
+</html>			
