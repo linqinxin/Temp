@@ -1,0 +1,26 @@
+BEGIN
+IF @disable_trigger IS NULL THEN 
+SET @disable_trigger = 1;
+update rpt_summary set complete_ratio=
+(select (sum(nb_fail)+sum(nb_noneed)+sum(nb_pass)) from rpt_dailystatistics 
+where rpt_dailystatistics.release_id= new.release_id 
+and rpt_dailystatistics.testset_id in (select testset_id from rpt_testscope 
+where testsuite_id=(select testsuite_id from rpt_testscope where id= new.scope_id)))/
+(select sum(nb_total) from rpt_testset where id in (select testset_id from rpt_testscope) 
+and testsuite_id=(select testsuite_id from rpt_testscope where id= new.scope_id)),update_date=current_date()
+where rpt_summary.release_id= new.release_id 
+and rpt_summary.suite_id=(select testsuite_id from rpt_testscope where id= new.scope_id);
+update rpt_testscope set status='Completed' where rpt_testscope.id= new.scope_id;
+IF ((new.nb_noneed+new.nb_pass+new.nb_fail)/(select nb_total from rpt_testset where id= new.testset_id))>0&&((new.nb_noneed+ new.nb_pass+ new.nb_fail)/(select nb_total from rpt_testset where id= new.testset_id))<1 THEN
+update rpt_testscope set status='In progress' where rpt_testscope.id= new.scope_id;
+END IF;
+IF ((new.nb_noneed+new.nb_pass+ new.nb_fail)/(select nb_total from rpt_testset where id= new.testset_id))=0 THEN
+update rpt_testscope set status='NEW' where rpt_testscope.id= new.scope_id;
+END IF;
+IF ((new.nb_noneed+ new.nb_pass+ new.nb_fail)/(select nb_total from rpt_testset where id= new.testset_id))=1 THEN
+update rpt_testscope set status='Completed' where rpt_testscope.id= new.scope_id;
+END IF;
+SET @disable_trigger = NULL;
+END IF;
+END
+END
